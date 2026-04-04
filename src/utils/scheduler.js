@@ -38,22 +38,30 @@ export function reactivate(card) {
   };
 }
 
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 export function getDueCards(cards, directionFilter) {
   const now = Date.now();
 
-  return cards
-    .filter((c) => {
-      if (c.status === "retired") return false;
-      if (directionFilter !== "both" && c.direction !== directionFilter)
-        return false;
-      return c.nextDue <= now;
-    })
-    .sort((a, b) => {
-      // Never-seen cards first (lastSeen === null), then oldest nextDue
-      if (a.lastSeen === null && b.lastSeen !== null) return -1;
-      if (a.lastSeen !== null && b.lastSeen === null) return 1;
-      return a.nextDue - b.nextDue;
-    });
+  const due = cards.filter((c) => {
+    if (c.status === "retired") return false;
+    if (directionFilter !== "both" && c.direction !== directionFilter)
+      return false;
+    return c.nextDue <= now;
+  });
+
+  // Split into unseen and seen, shuffle each group, then combine
+  // so unseen cards still come first but in random order
+  const unseen = due.filter((c) => c.lastSeen === null);
+  const seen = due.filter((c) => c.lastSeen !== null);
+
+  return [...shuffle(unseen), ...shuffle(seen)];
 }
 
 export function getNextDueTime(cards, directionFilter) {
