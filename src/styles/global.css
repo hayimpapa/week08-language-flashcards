@@ -54,11 +54,207 @@ body {
   line-height: 1.5;
 }
 
+/* ─── App shell (nav + main) ─── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .app {
   max-width: 540px;
   margin: 0 auto;
   padding: 20px 16px 40px;
-  min-height: 100vh;
+}
+
+/* ─── Nav bar ─── */
+.nav-bar {
+  flex-shrink: 0;
+  background: var(--warm-white);
+  border-bottom: 1px solid var(--sand-200);
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+}
+
+.nav-bar-inner {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.nav-logo:hover {
+  opacity: 0.75;
+}
+
+.nav-logo img {
+  height: 34px;
+  width: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-tab {
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-tab:hover {
+  color: var(--teal-600);
+  background: var(--teal-50);
+}
+
+.nav-tab.active {
+  color: var(--teal-700);
+  background: var(--teal-50);
+  border-bottom-color: var(--teal-500);
+}
+
+/* ─── About This Build ─── */
+.about-build {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about-header {
+  text-align: center;
+  padding: 20px 0 4px;
+}
+
+.about-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--teal-700);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.about-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.about-subtitle strong {
+  color: var(--teal-600);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.about-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-card {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--teal-500);
+}
+
+.about-card-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--teal-600);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.about-card p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.about-card code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--sand-100);
+  color: var(--text-primary);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.about-prompt-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--teal-500);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.about-prompt-link:hover {
+  color: var(--teal-700);
+}
+
+.about-github-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  background: var(--green-500);
+  color: white;
+  padding: 12px 22px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.about-github-btn:hover {
+  background: #246f3e;
+  box-shadow: var(--shadow-md);
 }
 
 /* ─── Buttons ─── */
@@ -366,7 +562,6 @@ body {
 .study-session {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 60px);
 }
 
 .session-header {
@@ -454,7 +649,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 80px);
+  min-height: 60vh;
 }
 
 .caught-up-card {
@@ -652,5 +847,27 @@ body {
 
   .btn-label {
     font-size: 0.75rem;
+  }
+
+  .nav-bar-inner {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .nav-logo img {
+    height: 30px;
+  }
+
+  .nav-tab {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  .about-title {
+    font-size: 1.8rem;
+  }
+
+  .about-card {
+    padding: 16px 16px;
   }
 }

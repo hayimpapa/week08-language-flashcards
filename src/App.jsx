@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import Dashboard from "./components/Dashboard";
 import StudySession from "./components/StudySession";
 import CardBrowser from "./components/CardBrowser";
+import NavBar from "./components/NavBar";
+import AboutThisBuild from "./components/AboutThisBuild";
 import { loadState, saveState, initializeCards } from "./utils/storage";
 import {
   repeatSoon,
@@ -18,6 +20,7 @@ function findCardIndex(cards, wordId, direction) {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState("app");
   const [screen, setScreen] = useState("dashboard");
   const [directionFilter, setDirectionFilter] = useState("both");
   const [cards, setCards] = useState(() => {
@@ -63,33 +66,43 @@ export default function App() {
   );
 
   return (
-    <div className="app">
-      {screen === "dashboard" && (
-        <Dashboard
-          cards={cards}
-          directionFilter={directionFilter}
-          onDirectionChange={setDirectionFilter}
-          onStudy={() => setScreen("study")}
-          onBrowse={() => setScreen("browse")}
-        />
-      )}
-      {screen === "study" && (
-        <StudySession
-          cards={cards}
-          directionFilter={directionFilter}
-          onRepeatSoon={handleRepeatSoon}
-          onRepeatLater={handleRepeatLater}
-          onRetire={handleRetire}
-          onBack={() => setScreen("dashboard")}
-        />
-      )}
-      {screen === "browse" && (
-        <CardBrowser
-          cards={cards}
-          onReactivate={handleReactivate}
-          onBack={() => setScreen("dashboard")}
-        />
-      )}
+    <div className="app-shell">
+      <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
+      <main className="app-main">
+        <div className="app">
+          {activeTab === "app" && (
+            <>
+              {screen === "dashboard" && (
+                <Dashboard
+                  cards={cards}
+                  directionFilter={directionFilter}
+                  onDirectionChange={setDirectionFilter}
+                  onStudy={() => setScreen("study")}
+                  onBrowse={() => setScreen("browse")}
+                />
+              )}
+              {screen === "study" && (
+                <StudySession
+                  cards={cards}
+                  directionFilter={directionFilter}
+                  onRepeatSoon={handleRepeatSoon}
+                  onRepeatLater={handleRepeatLater}
+                  onRetire={handleRetire}
+                  onBack={() => setScreen("dashboard")}
+                />
+              )}
+              {screen === "browse" && (
+                <CardBrowser
+                  cards={cards}
+                  onReactivate={handleReactivate}
+                  onBack={() => setScreen("dashboard")}
+                />
+              )}
+            </>
+          )}
+          {activeTab === "about" && <AboutThisBuild />}
+        </div>
+      </main>
     </div>
   );
 }
