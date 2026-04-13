@@ -1,8 +1,7 @@
 import { useState } from "react";
-import words from "../data/words";
 import { getCardKey } from "../utils/storage";
 
-export default function CardBrowser({ cards, onReactivate, onBack }) {
+export default function CardBrowser({ cards, words, onReactivate, onBack }) {
   const [search, setSearch] = useState("");
 
   const cardMap = {};
