@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import FlashCard from "./FlashCard";
 import { getDueCards, getNextDueTime } from "../utils/scheduler";
-import words from "../data/words";
 
 // Matches the .flashcard-inner transition duration in global.css so the next
 // card isn't swapped in until the current card has finished flipping back.
@@ -9,6 +8,7 @@ const FLIP_ANIMATION_MS = 600;
 
 export default function StudySession({
   cards,
+  words,
   directionFilter,
   onRepeatSoon,
   onRepeatLater,

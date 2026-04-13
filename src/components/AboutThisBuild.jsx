@@ -29,11 +29,12 @@ export default function AboutThisBuild() {
           <p>
             LinguaFlip is a minimal flashcard app for learning Indonesian,
             built with React 19 and Vite. It uses a lightweight spaced
-            repetition scheduler — repeat soon, repeat later, or retire —
-            and persists progress to <code>localStorage</code>, so there's no
-            sign-up or backend. You can study in either direction (English →
-            Indonesian or the reverse), browse every card, and reactivate
-            retired ones.
+            repetition scheduler — repeat soon, repeat later, or retire. The
+            vocabulary list is stored in <strong>Supabase</strong> and fetched
+            once at startup, while your review progress is persisted locally
+            to <code>localStorage</code> so there's no sign-up required. You
+            can study in either direction (English → Indonesian or the
+            reverse), browse every card, and reactivate retired ones.
           </p>
         </section>
 
