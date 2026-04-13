@@ -1,7 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import FlashCard from "./FlashCard";
 import { getDueCards, getNextDueTime } from "../utils/scheduler";
 import words from "../data/words";
+
+// Matches the .flashcard-inner transition duration in global.css so the next
+// card isn't swapped in until the current card has finished flipping back.
+const FLIP_ANIMATION_MS = 600;
 
 export default function StudySession({
   cards,
@@ -17,6 +21,16 @@ export default function StudySession({
     getDueCards(cards, directionFilter)
   );
   const [completedCount, setCompletedCount] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const transitionTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const currentCard = sessionCards[currentIndex];
   const currentWord = currentCard
@@ -27,30 +41,37 @@ export default function StudySession({
 
   const handleResponse = useCallback(
     (action) => {
-      if (!currentCard) return;
+      if (!currentCard || isTransitioning) return;
 
       if (action === "soon") onRepeatSoon(currentCard.wordId, currentCard.direction);
       else if (action === "later") onRepeatLater(currentCard.wordId, currentCard.direction);
       else if (action === "retire") onRetire(currentCard.wordId, currentCard.direction);
 
-      setCompletedCount((c) => c + 1);
+      // Start flipping back, but delay swapping in the next card until the
+      // flip animation has finished — otherwise the back face of the card
+      // briefly reveals the next card's answer mid-rotation.
+      setIsTransitioning(true);
       setIsFlipped(false);
 
-      // Remove answered card and stay at same index (or wrap)
-      setSessionCards((prev) => {
-        const next = prev.filter((_, i) => i !== currentIndex);
-        if (currentIndex >= next.length && next.length > 0) {
-          setCurrentIndex(0);
-        }
-        return next;
-      });
+      transitionTimeoutRef.current = setTimeout(() => {
+        setCompletedCount((c) => c + 1);
+        setSessionCards((prev) => {
+          const next = prev.filter((_, i) => i !== currentIndex);
+          if (currentIndex >= next.length && next.length > 0) {
+            setCurrentIndex(0);
+          }
+          return next;
+        });
+        setIsTransitioning(false);
+        transitionTimeoutRef.current = null;
+      }, FLIP_ANIMATION_MS);
     },
-    [currentCard, currentIndex, onRepeatSoon, onRepeatLater, onRetire]
+    [currentCard, currentIndex, isTransitioning, onRepeatSoon, onRepeatLater, onRetire]
   );
 
   useEffect(() => {
     function handleKey(e) {
-      if (!currentCard) return;
+      if (!currentCard || isTransitioning) return;
 
       if (!isFlipped && (e.key === " " || e.key === "Enter")) {
         e.preventDefault();
@@ -64,7 +85,7 @@ export default function StudySession({
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentCard, isFlipped, handleResponse]);
+  }, [currentCard, isFlipped, isTransitioning, handleResponse]);
 
   function formatTimeUntil(timestamp) {
     if (!timestamp) return "";
@@ -123,7 +144,9 @@ export default function StudySession({
         word={currentWord}
         direction={currentCard.direction}
         isFlipped={isFlipped}
-        onFlip={() => setIsFlipped(true)}
+        onFlip={() => {
+          if (!isTransitioning) setIsFlipped(true);
+        }}
       />
 
       {isFlipped && (
