@@ -28,7 +28,7 @@ export default function CardBrowser({
     );
   });
 
-  const langShort = language.code.slice(0, 2).toUpperCase();
+  const langShort = language.short;
 
   function statusBadge(card) {
     if (!card) return <span className="badge-status badge-new">New</span>;

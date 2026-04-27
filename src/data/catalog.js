@@ -3,8 +3,8 @@
 // Entries flagged active=false render as "Coming soon" and aren't selectable.
 
 export const LANGUAGES = [
-  { code: "indonesian", name: "Indonesian", flag: "🇮🇩", active: true },
-  { code: "spanish",    name: "Spanish",    flag: "🇪🇸", active: false },
+  { code: "indonesian", short: "ID", name: "Indonesian", flag: "🇮🇩", active: true  },
+  { code: "spanish",    short: "ES", name: "Spanish",    flag: "🇪🇸", active: false },
 ];
 
 export const LEVELS = [
