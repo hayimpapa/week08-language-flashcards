@@ -1,7 +1,17 @@
 import { useState } from "react";
+import Breadcrumb from "./Breadcrumb";
 import { getCardKey } from "../utils/storage";
 
-export default function CardBrowser({ cards, words, onReactivate, onBack }) {
+export default function CardBrowser({
+  cards,
+  words,
+  language,
+  level,
+  onReactivate,
+  onBack,
+  onChangeLanguage,
+  onChangeLevel,
+}) {
   const [search, setSearch] = useState("");
 
   const cardMap = {};
@@ -14,9 +24,11 @@ export default function CardBrowser({ cards, words, onReactivate, onBack }) {
     return (
       !q ||
       w.english.toLowerCase().includes(q) ||
-      w.indonesian.toLowerCase().includes(q)
+      w.translation.toLowerCase().includes(q)
     );
   });
+
+  const langShort = language.code.slice(0, 2).toUpperCase();
 
   function statusBadge(card) {
     if (!card) return <span className="badge-status badge-new">New</span>;
@@ -30,6 +42,13 @@ export default function CardBrowser({ cards, words, onReactivate, onBack }) {
 
   return (
     <div className="card-browser">
+      <Breadcrumb
+        language={language}
+        level={level}
+        onChangeLanguage={onChangeLanguage}
+        onChangeLevel={onChangeLevel}
+      />
+
       <div className="browser-header">
         <button className="btn btn-ghost" onClick={onBack}>
           ← Back
@@ -48,36 +67,36 @@ export default function CardBrowser({ cards, words, onReactivate, onBack }) {
 
       <div className="browser-list">
         {filtered.map((word) => {
-          const enId = cardMap[getCardKey(word.id, "en-id")];
-          const idEn = cardMap[getCardKey(word.id, "id-en")];
+          const enTr = cardMap[getCardKey(word.id, "en-tr")];
+          const trEn = cardMap[getCardKey(word.id, "tr-en")];
 
           return (
             <div key={word.id} className="browser-item">
               <div className="browser-item-words">
                 <span className="word-en">{word.english}</span>
                 <span className="word-arrow">↔</span>
-                <span className="word-id">{word.indonesian}</span>
+                <span className="word-id">{word.translation}</span>
               </div>
               <div className="browser-item-status">
                 <div className="direction-status">
-                  <span className="dir-label">EN→ID</span>
-                  {statusBadge(enId)}
-                  {enId && enId.status === "retired" && (
+                  <span className="dir-label">EN→{langShort}</span>
+                  {statusBadge(enTr)}
+                  {enTr && enTr.status === "retired" && (
                     <button
                       className="btn btn-xs"
-                      onClick={() => onReactivate(word.id, "en-id")}
+                      onClick={() => onReactivate(word.id, "en-tr")}
                     >
                       Undo
                     </button>
                   )}
                 </div>
                 <div className="direction-status">
-                  <span className="dir-label">ID→EN</span>
-                  {statusBadge(idEn)}
-                  {idEn && idEn.status === "retired" && (
+                  <span className="dir-label">{langShort}→EN</span>
+                  {statusBadge(trEn)}
+                  {trEn && trEn.status === "retired" && (
                     <button
                       className="btn btn-xs"
-                      onClick={() => onReactivate(word.id, "id-en")}
+                      onClick={() => onReactivate(word.id, "tr-en")}
                     >
                       Undo
                     </button>

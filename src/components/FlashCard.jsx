@@ -1,10 +1,16 @@
-import { useState } from "react";
-
-export default function FlashCard({ word, direction, onFlip, isFlipped }) {
-  const front = direction === "en-id" ? word.english : word.indonesian;
-  const back = direction === "en-id" ? word.indonesian : word.english;
+export default function FlashCard({
+  word,
+  direction,
+  languageName,
+  onFlip,
+  isFlipped,
+}) {
+  const front = direction === "en-tr" ? word.english : word.translation;
+  const back = direction === "en-tr" ? word.translation : word.english;
   const label =
-    direction === "en-id" ? "English → Indonesian" : "Indonesian → English";
+    direction === "en-tr"
+      ? `English → ${languageName}`
+      : `${languageName} → English`;
 
   return (
     <div className="flashcard-container">

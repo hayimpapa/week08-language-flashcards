@@ -4,6 +4,8 @@ import StudySession from "./components/StudySession";
 import CardBrowser from "./components/CardBrowser";
 import NavBar from "./components/NavBar";
 import AboutThisBuild from "./components/AboutThisBuild";
+import LanguageSelect from "./components/LanguageSelect";
+import LevelSelect from "./components/LevelSelect";
 import { loadState, saveState, initializeCards } from "./utils/storage";
 import {
   repeatSoon,
@@ -21,22 +23,30 @@ function findCardIndex(cards, wordId, direction) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("app");
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState(null);
   const [screen, setScreen] = useState("dashboard");
   const [directionFilter, setDirectionFilter] = useState("both");
   const [words, setWords] = useState(null);
   const [cards, setCards] = useState(null);
   const [loadError, setLoadError] = useState(null);
 
-  // Fetch the word list from Supabase once on mount, then hydrate the
-  // localStorage progress (or seed a fresh card set if nothing is saved).
+  // Whenever the (language, level) pair changes, fetch that course's words
+  // from Supabase and hydrate progress from the matching localStorage bucket.
+  // State resets between courses are handled by the change handlers below, so
+  // this effect only runs the fetch.
   useEffect(() => {
-    let cancelled = false;
+    if (!selectedLanguage || !selectedLevel) return;
 
-    fetchWords()
+    let cancelled = false;
+    const langCode = selectedLanguage.code;
+    const levelCode = selectedLevel.code;
+
+    fetchWords(langCode, levelCode)
       .then((fetched) => {
         if (cancelled) return;
         setWords(fetched);
-        const saved = loadState();
+        const saved = loadState(langCode, levelCode);
         if (saved && saved.cards && saved.cards.length === fetched.length * 2) {
           setCards(saved.cards);
         } else {
@@ -52,13 +62,14 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedLanguage, selectedLevel]);
 
-  // Progress is persisted to localStorage on every card change, exactly as
-  // before. Words are never written here.
+  // Persist progress to the bucket that matches the current course.
   useEffect(() => {
-    if (cards) saveState({ cards });
-  }, [cards]);
+    if (cards && selectedLanguage && selectedLevel) {
+      saveState(selectedLanguage.code, selectedLevel.code, { cards });
+    }
+  }, [cards, selectedLanguage, selectedLevel]);
 
   const updateCard = useCallback((wordId, direction, updater) => {
     setCards((prev) => {
@@ -91,16 +102,65 @@ export default function App() {
     [updateCard]
   );
 
+  function resetCourseData() {
+    setWords(null);
+    setCards(null);
+    setLoadError(null);
+  }
+
+  function changeLanguage() {
+    resetCourseData();
+    setSelectedLanguage(null);
+    setSelectedLevel(null);
+    setScreen("dashboard");
+    setDirectionFilter("both");
+  }
+
+  function changeLevel() {
+    resetCourseData();
+    setSelectedLevel(null);
+    setScreen("dashboard");
+    setDirectionFilter("both");
+  }
+
+  function pickLanguage(lang) {
+    resetCourseData();
+    setSelectedLanguage(lang);
+  }
+
+  function pickLevel(lvl) {
+    resetCourseData();
+    setSelectedLevel(lvl);
+  }
+
   function renderAppContent() {
+    if (!selectedLanguage) {
+      return <LanguageSelect onSelect={pickLanguage} />;
+    }
+
+    if (!selectedLevel) {
+      return (
+        <LevelSelect
+          language={selectedLanguage}
+          onSelect={pickLevel}
+          onBackToLanguage={changeLanguage}
+        />
+      );
+    }
+
     if (loadError) {
       return (
         <div className="load-state load-error">
           <h2>Couldn't load words</h2>
           <p>{loadError.message}</p>
           <p>
-            Check your Supabase credentials in <code>.env.local</code> and that
-            the <code>words</code> table exists.
+            Check your Supabase credentials in <code>.env.local</code>, that
+            the <code>words</code> table exists, and that you've applied{" "}
+            <code>supabase/migrations/001_add_language_and_level.sql</code>.
           </p>
+          <button className="btn btn-ghost" onClick={changeLevel}>
+            ← Back to levels
+          </button>
         </div>
       );
     }
@@ -117,10 +177,14 @@ export default function App() {
       return (
         <Dashboard
           cards={cards}
+          language={selectedLanguage}
+          level={selectedLevel}
           directionFilter={directionFilter}
           onDirectionChange={setDirectionFilter}
           onStudy={() => setScreen("study")}
           onBrowse={() => setScreen("browse")}
+          onChangeLanguage={changeLanguage}
+          onChangeLevel={changeLevel}
         />
       );
     }
@@ -130,11 +194,15 @@ export default function App() {
         <StudySession
           cards={cards}
           words={words}
+          language={selectedLanguage}
+          level={selectedLevel}
           directionFilter={directionFilter}
           onRepeatSoon={handleRepeatSoon}
           onRepeatLater={handleRepeatLater}
           onRetire={handleRetire}
           onBack={() => setScreen("dashboard")}
+          onChangeLanguage={changeLanguage}
+          onChangeLevel={changeLevel}
         />
       );
     }
@@ -144,8 +212,12 @@ export default function App() {
         <CardBrowser
           cards={cards}
           words={words}
+          language={selectedLanguage}
+          level={selectedLevel}
           onReactivate={handleReactivate}
           onBack={() => setScreen("dashboard")}
+          onChangeLanguage={changeLanguage}
+          onChangeLevel={changeLevel}
         />
       );
     }
