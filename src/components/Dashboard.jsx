@@ -1,17 +1,16 @@
+import Breadcrumb from "./Breadcrumb";
 import { getStats, getDueCards } from "../utils/scheduler";
-
-const DIRECTION_OPTIONS = [
-  { value: "both", label: "Both Directions" },
-  { value: "en-id", label: "English → Indonesian" },
-  { value: "id-en", label: "Indonesian → English" },
-];
 
 export default function Dashboard({
   cards,
+  language,
+  level,
   directionFilter,
   onDirectionChange,
   onStudy,
   onBrowse,
+  onChangeLanguage,
+  onChangeLevel,
 }) {
   const stats = getStats(cards);
   const dueCards = getDueCards(cards, directionFilter);
@@ -20,11 +19,26 @@ export default function Dashboard({
       ? Math.round((stats.totalRetired / stats.totalCards) * 100)
       : 0;
 
+  const directionOptions = [
+    { value: "both", label: "Both Directions" },
+    { value: "en-tr", label: `English → ${language.name}` },
+    { value: "tr-en", label: `${language.name} → English` },
+  ];
+
   return (
     <div className="dashboard">
+      <Breadcrumb
+        language={language}
+        level={level}
+        onChangeLanguage={onChangeLanguage}
+        onChangeLevel={onChangeLevel}
+      />
+
       <header className="dashboard-header">
         <h1 className="app-title">LinguaFlip</h1>
-        <p className="app-subtitle">Belajar Bahasa Indonesia</p>
+        <p className="app-subtitle">
+          {language.flag} {language.name} · {level.name}
+        </p>
       </header>
 
       <div className="stats-row">
@@ -56,7 +70,7 @@ export default function Dashboard({
       </div>
 
       <div className="direction-toggle">
-        {DIRECTION_OPTIONS.map((opt) => (
+        {directionOptions.map((opt) => (
           <button
             key={opt.value}
             className={`btn btn-direction ${

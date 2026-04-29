@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import FlashCard from "./FlashCard";
+import Breadcrumb from "./Breadcrumb";
 import { getDueCards, getNextDueTime } from "../utils/scheduler";
 
 // Matches the .flashcard-inner transition duration in global.css so the next
@@ -9,11 +10,15 @@ const FLIP_ANIMATION_MS = 600;
 export default function StudySession({
   cards,
   words,
+  language,
+  level,
   directionFilter,
   onRepeatSoon,
   onRepeatLater,
   onRetire,
   onBack,
+  onChangeLanguage,
+  onChangeLevel,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -101,26 +106,34 @@ export default function StudySession({
 
   if (!currentWord || sessionCards.length === 0) {
     return (
-      <div className="session-empty">
-        <div className="caught-up-card">
-          <span className="caught-up-icon">🌴</span>
-          <h2>You're all caught up!</h2>
-          {nextDueTime ? (
-            <p>
-              Next card due in <strong>{formatTimeUntil(nextDueTime)}</strong>
-            </p>
-          ) : (
-            <p>All cards have been retired. Amazing work!</p>
-          )}
-          {completedCount > 0 && (
-            <p className="completed-note">
-              You reviewed {completedCount} card{completedCount !== 1 ? "s" : ""}{" "}
-              this session.
-            </p>
-          )}
-          <button className="btn btn-primary" onClick={onBack}>
-            Back to Dashboard
-          </button>
+      <div className="study-session">
+        <Breadcrumb
+          language={language}
+          level={level}
+          onChangeLanguage={onChangeLanguage}
+          onChangeLevel={onChangeLevel}
+        />
+        <div className="session-empty">
+          <div className="caught-up-card">
+            <span className="caught-up-icon">🌴</span>
+            <h2>You're all caught up!</h2>
+            {nextDueTime ? (
+              <p>
+                Next card due in <strong>{formatTimeUntil(nextDueTime)}</strong>
+              </p>
+            ) : (
+              <p>All cards have been retired. Amazing work!</p>
+            )}
+            {completedCount > 0 && (
+              <p className="completed-note">
+                You reviewed {completedCount} card
+                {completedCount !== 1 ? "s" : ""} this session.
+              </p>
+            )}
+            <button className="btn btn-primary" onClick={onBack}>
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -128,6 +141,13 @@ export default function StudySession({
 
   return (
     <div className="study-session">
+      <Breadcrumb
+        language={language}
+        level={level}
+        onChangeLanguage={onChangeLanguage}
+        onChangeLevel={onChangeLevel}
+      />
+
       <div className="session-header">
         <button className="btn btn-ghost" onClick={onBack}>
           ← Back
@@ -143,6 +163,7 @@ export default function StudySession({
       <FlashCard
         word={currentWord}
         direction={currentCard.direction}
+        languageName={language.name}
         isFlipped={isFlipped}
         onFlip={() => {
           if (!isTransitioning) setIsFlipped(true);

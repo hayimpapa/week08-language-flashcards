@@ -2,7 +2,9 @@
 -- Run this once in the Supabase SQL editor after running schema.sql.
 -- Uses `on conflict (id) do nothing` so the file is safe to re-run.
 
-insert into public.words (id, english, indonesian) values
+-- The `language` and `level` columns default to 'indonesian' / 'beginner',
+-- so we only specify id/english/translation here.
+insert into public.words (id, english, translation) values
   (1, 'Good morning', 'Selamat pagi'),
   (2, 'Good afternoon', 'Selamat siang'),
   (3, 'Good evening', 'Selamat malam'),
